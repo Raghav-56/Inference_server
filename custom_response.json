@@ -1,0 +1,14 @@
+{
+  "status": "success",
+  "filename": "custom_response.mp4",
+  "file_size_bytes": 0,
+  "processing_status": "completed",
+  "content_type": "custom",
+  "analysis": {
+    "custom_field_1": "This is a custom response",
+    "custom_field_2": "You can edit this JSON file to customize the response",
+    "custom_field_3": "Replace any values as needed",
+    "note": "This response overrides the default analysis when ENABLE_CUSTOM_RESPONSE is True"
+  },
+  "message": "Custom JSON response is active. Edit custom_response.json to modify this output."
+}

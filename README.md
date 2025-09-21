@@ -7,6 +7,9 @@ Server for Inference script - A FastAPI server for processing audio and video fi
 - **Health Check**: Simple endpoint to verify server status
 - **JSON Responses**: All endpoints return structured JSON responses
 - **File Validation**: Automatic file type and size validation
+- **Web Interface**: User-friendly file upload interface at base route (/)
+- **FFmpeg Analysis**: Real-time metadata extraction using FFmpeg
+- **Custom Response Override**: Optional feature to return custom JSON responses
 - **Extensible**: Ready for AI model integration
 
 ## Installation
@@ -30,6 +33,9 @@ python3 app.py
 ```
 
 The server will start on `http://localhost:8000`
+
+### Web Interface
+Visit `http://localhost:8000` for a user-friendly file upload interface with drag-and-drop functionality and real-time analysis results.
 
 ### API Documentation
 Once the server is running, you can access:
@@ -127,23 +133,53 @@ curl -X POST "http://localhost:8000/upload-video" \
 
 ```
 Inference_server/
-├── app.py              # Main FastAPI application
-├── main.py             # Processing logic for audio/video files
-├── requirements.txt    # Python dependencies
-└── README.md          # This file
+├── app.py                    # Main FastAPI application
+├── main.py                   # Processing logic for audio/video files
+├── custom_response.json      # Custom JSON response template (editable)
+├── analysis/                 # Analysis modules
+│   ├── __init__.py          # Package initialization
+│   ├── video_analyzer.py    # Video analysis using FFmpeg
+│   └── audio_analyzer.py    # Audio analysis using FFmpeg
+├── requirements.txt          # Python dependencies
+├── run.sh                   # Convenience startup script
+└── README.md                # This file
 ```
 
 ## Processing Logic
 
-The server uses the `main.py` file for processing uploaded files. Currently, it contains placeholder logic that:
-- Validates file information
-- Returns basic file metadata
-- Provides structured response format
+The server uses the `main.py` file for processing uploaded files. Currently, it includes:
+
+### Real Analysis with FFmpeg
+- **Video Analysis**: Extracts duration, resolution, FPS, codec, format, bitrate, and aspect ratio
+- **Audio Analysis**: Extracts duration, sample rate, channels, codec, format, bitrate, and channel layout
+- **Metadata Extraction**: Uses FFmpeg to analyze actual file properties
+- **Error Handling**: Graceful handling of unsupported or corrupted files
+
+### Custom Response Override
+A special feature allows you to override the default analysis with custom JSON responses:
+
+1. **Enable Override**: Set `ENABLE_CUSTOM_RESPONSE = True` in `main.py`
+2. **Edit Response**: Modify `custom_response.json` with your desired response
+3. **Dynamic Filename**: The filename will automatically update to match the uploaded file
+4. **Use Cases**: Testing, demos, or returning predetermined responses
+
+**Example custom response:**
+```json
+{
+  "status": "success",
+  "filename": "will_be_updated_automatically.mp4",
+  "content_type": "custom",
+  "analysis": {
+    "your_custom_field": "your_custom_value"
+  },
+  "message": "Your custom message here"
+}
+```
 
 This module is designed to be extended with:
 - AI model integration for video classification
-- Audio analysis capabilities
-- Advanced processing pipelines
+- Advanced audio analysis capabilities
+- Machine learning inference pipelines
 
 ## Development
 
