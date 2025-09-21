@@ -9,6 +9,7 @@ Server for Inference script - A FastAPI server for processing audio and video fi
 - **File Validation**: Automatic file type and size validation
 - **Web Interface**: User-friendly file upload interface at base route (/)
 - **FFmpeg Analysis**: Real-time metadata extraction using FFmpeg
+- **Persistent File Storage**: Uploaded files are saved in `data/uploads/` folder
 - **Custom Response Override**: Optional feature to return custom JSON responses
 - **Extensible**: Ready for AI model integration
 
@@ -136,6 +137,8 @@ Inference_server/
 ├── app.py                    # Main FastAPI application
 ├── main.py                   # Processing logic for audio/video files
 ├── custom_response.json      # Custom JSON response template (editable)
+├── data/                     # Data storage directory
+│   └── uploads/             # Uploaded files (persistent storage)
 ├── analysis/                 # Analysis modules
 │   ├── __init__.py          # Package initialization
 │   ├── video_analyzer.py    # Video analysis using FFmpeg
@@ -144,6 +147,8 @@ Inference_server/
 ├── run.sh                   # Convenience startup script
 └── README.md                # This file
 ```
+
+**Note**: The `data/` folder is automatically created and excluded from version control. Uploaded files are stored persistently with timestamp-based filenames to avoid conflicts.
 
 ## Processing Logic
 
@@ -154,6 +159,7 @@ The server uses the `main.py` file for processing uploaded files. Currently, it 
 - **Audio Analysis**: Extracts duration, sample rate, channels, codec, format, bitrate, and channel layout
 - **Metadata Extraction**: Uses FFmpeg to analyze actual file properties
 - **Error Handling**: Graceful handling of unsupported or corrupted files
+- **File Storage**: Uploaded files are saved permanently in `data/uploads/` with timestamp-based filenames
 
 ### Custom Response Override
 A special feature allows you to override the default analysis with custom JSON responses:
