@@ -52,13 +52,23 @@ def validate_file_type(file: UploadFile, supported_types: set) -> bool:
     return file.content_type in supported_types
 
 def save_uploaded_file(file: UploadFile) -> str:
-    """Save uploaded file to a temporary location and return the path."""
+    """Save uploaded file to the data folder and return the path."""
     try:
-        # Create a temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
-            # Copy file content to temporary file
-            shutil.copyfileobj(file.file, temp_file)
-            return temp_file.name
+        # Create data/uploads directory if it doesn't exist
+        data_dir = os.path.join("data", "uploads")
+        os.makedirs(data_dir, exist_ok=True)
+        
+        # Generate a unique filename with timestamp to avoid conflicts
+        import time
+        timestamp = int(time.time() * 1000)  # milliseconds
+        filename = f"{timestamp}_{file.filename}"
+        file_path = os.path.join(data_dir, filename)
+        
+        # Save file to data folder
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        return file_path
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -216,7 +226,7 @@ async def upload_audio(file: UploadFile = File(...)) -> ProcessingResponse:
     
     temp_file_path = None
     try:
-        # Save file temporarily
+        # Save file to data folder
         temp_file_path = save_uploaded_file(file)
         
         # Process the audio file
@@ -232,13 +242,7 @@ async def upload_audio(file: UploadFile = File(...)) -> ProcessingResponse:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error processing audio file: {str(e)}"
         )
-    finally:
-        # Clean up temporary file
-        if temp_file_path and os.path.exists(temp_file_path):
-            try:
-                os.unlink(temp_file_path)
-            except Exception:
-                pass  # Ignore cleanup errors
+    # Note: Files are now saved persistently in data/uploads folder
 
 @app.post("/upload-video", response_model=ProcessingResponse)
 async def upload_video(file: UploadFile = File(...)) -> ProcessingResponse:
@@ -275,7 +279,7 @@ async def upload_video(file: UploadFile = File(...)) -> ProcessingResponse:
     
     temp_file_path = None
     try:
-        # Save file temporarily
+        # Save file to data folder
         temp_file_path = save_uploaded_file(file)
         
         # Process the video file using main.py
@@ -291,13 +295,7 @@ async def upload_video(file: UploadFile = File(...)) -> ProcessingResponse:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error processing video file: {str(e)}"
         )
-    finally:
-        # Clean up temporary file
-        if temp_file_path and os.path.exists(temp_file_path):
-            try:
-                os.unlink(temp_file_path)
-            except Exception:
-                pass  # Ignore cleanup errors
+    # Note: Files are now saved persistently in data/uploads folder
 
 # Error handler for large files
 @app.exception_handler(413)
