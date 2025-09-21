@@ -21,15 +21,37 @@ git clone https://github.com/Raghav-56/Inference_server.git
 cd Inference_server
 ```
 
-2. Install dependencies:
+2. Quick start (auto-setup with uv):
 ```bash
-pip install -r requirements.txt
+# From repo root
+bash run.sh
 ```
+
+This will:
+- Install `uv` if missing
+- Create/activate a virtualenv at `.venv`
+- Install dependencies from `requirements.txt`
+- Start the server
 
 ## Usage
 
-### Start the server:
+### Start the server
+
+Option A — using the provisioning script (recommended):
 ```bash
+bash run.sh
+```
+
+Option B — using Make (shortcut):
+```bash
+make run
+```
+
+Option C — manual steps:
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
 python3 app.py
 ```
 
