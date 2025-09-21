@@ -1,10 +1,10 @@
 """
 Main processing module for video and audio files.
-This module contains the logic for processing uploaded files.
+This module contains the logic for processing uploaded files using analysis modules.
 """
 
-import os
 from typing import Dict, Any
+from analysis import VideoAnalyzer, AudioAnalyzer
 
 
 def process_video(file_path: str, filename: str) -> Dict[str, Any]:
@@ -19,26 +19,15 @@ def process_video(file_path: str, filename: str) -> Dict[str, Any]:
         Dict[str, Any]: Processing results as a dictionary
         
     Note:
-        This is a placeholder function. AI model integration logic
-        will be implemented here later.
+        Uses VideoAnalyzer for actual video analysis with OpenCV and FFmpeg.
+        AI model integration can be added here later.
     """
-    # Placeholder processing logic
-    file_size = os.path.getsize(file_path) if os.path.exists(file_path) else 0
+    # Use the VideoAnalyzer from the analysis module
+    results = VideoAnalyzer.analyze_video(file_path, filename)
     
-    # Simulate processing results
-    results = {
-        "status": "success",
-        "filename": filename,
-        "file_size_bytes": file_size,
-        "processing_status": "completed",
-        "content_type": "video",
-        "analysis": {
-            "duration": "placeholder - to be calculated",
-            "resolution": "placeholder - to be detected",
-            "classification": "placeholder - AI model will classify later"
-        },
-        "message": "Video processed successfully. AI classification pending implementation."
-    }
+    # Add a note about future AI model integration
+    if results.get("status") == "success":
+        results["message"] += " AI model classification can be integrated here later."
     
     return results
 
@@ -55,25 +44,14 @@ def process_audio(file_path: str, filename: str) -> Dict[str, Any]:
         Dict[str, Any]: Processing results as a dictionary
         
     Note:
-        This is a placeholder function. Audio processing logic
-        will be implemented here later.
+        Uses AudioAnalyzer for actual audio analysis with FFmpeg.
+        AI model integration can be added here later.
     """
-    # Placeholder processing logic
-    file_size = os.path.getsize(file_path) if os.path.exists(file_path) else 0
+    # Use the AudioAnalyzer from the analysis module
+    results = AudioAnalyzer.analyze_audio(file_path, filename)
     
-    # Simulate processing results
-    results = {
-        "status": "success",
-        "filename": filename,
-        "file_size_bytes": file_size,
-        "processing_status": "completed",
-        "content_type": "audio",
-        "analysis": {
-            "duration": "placeholder - to be calculated",
-            "sample_rate": "placeholder - to be detected",
-            "format": "placeholder - to be identified"
-        },
-        "message": "Audio processed successfully."
-    }
+    # Add a note about future AI model integration
+    if results.get("status") == "success":
+        results["message"] += " AI model classification can be integrated here later."
     
     return results
