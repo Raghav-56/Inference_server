@@ -6,8 +6,8 @@ This server provides endpoints for processing media files and health checks.
 import os
 import tempfile
 from typing import Dict, Any
-from fastapi import FastAPI, File, UploadFile, HTTPException, status
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, File, UploadFile, HTTPException, status, Request
+from fastapi.responses import JSONResponse, HTMLResponse
 from pydantic import BaseModel
 import shutil
 
@@ -64,6 +64,108 @@ def save_uploaded_file(file: UploadFile) -> str:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error saving file: {str(e)}"
         )
+
+@app.get("/", response_class=HTMLResponse)
+async def upload_interface():
+    """
+    Serve a minimal HTML interface for file uploads at the base route.
+    
+    Returns:
+        HTMLResponse: Simple HTML form for file uploads
+    """
+    html_content = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Inference Server - File Upload</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }
+            .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            h1 { color: #333; text-align: center; margin-bottom: 30px; }
+            .upload-section { margin: 20px 0; padding: 20px; border: 2px dashed #ddd; border-radius: 8px; text-align: center; }
+            .upload-section:hover { border-color: #007bff; background-color: #f8f9fa; }
+            input[type="file"] { margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; width: 100%; }
+            button { background-color: #007bff; color: white; padding: 12px 30px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+            button:hover { background-color: #0056b3; }
+            .info { margin-top: 20px; padding: 15px; background-color: #e9ecef; border-radius: 4px; }
+            .result { margin-top: 20px; padding: 15px; border-radius: 4px; white-space: pre-wrap; }
+            .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+            .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🎬 Inference Server - File Analysis</h1>
+            
+            <div class="upload-section">
+                <h3>📹 Upload Video File</h3>
+                <form id="videoForm" enctype="multipart/form-data">
+                    <input type="file" id="videoFile" name="file" accept="video/*" required>
+                    <br>
+                    <button type="submit">Analyze Video</button>
+                </form>
+            </div>
+            
+            <div class="upload-section">
+                <h3>🎵 Upload Audio File</h3>
+                <form id="audioForm" enctype="multipart/form-data">
+                    <input type="file" id="audioFile" name="file" accept="audio/*" required>
+                    <br>
+                    <button type="submit">Analyze Audio</button>
+                </form>
+            </div>
+            
+            <div class="info">
+                <strong>ℹ️ Information:</strong><br>
+                • Supported video formats: MP4, AVI, MOV, WMV, FLV, WebM, MKV, M4V<br>
+                • Supported audio formats: MP3, WAV, FLAC, AAC, OGG, M4A, WMA<br>
+                • Max video size: 500MB | Max audio size: 100MB<br>
+                • Files are analyzed using FFmpeg and OpenCV for metadata extraction
+            </div>
+            
+            <div id="result"></div>
+        </div>
+
+        <script>
+            async function uploadFile(formId, endpoint) {
+                const form = document.getElementById(formId);
+                const formData = new FormData(form);
+                const resultDiv = document.getElementById('result');
+                
+                resultDiv.innerHTML = '<div class="result">⏳ Processing file...</div>';
+                
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        resultDiv.innerHTML = `<div class="result success"><strong>✅ Analysis Complete!</strong><br><br>${JSON.stringify(result, null, 2)}</div>`;
+                    } else {
+                        resultDiv.innerHTML = `<div class="result error"><strong>❌ Error:</strong><br><br>${JSON.stringify(result, null, 2)}</div>`;
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML = `<div class="result error"><strong>❌ Network Error:</strong><br><br>${error.message}</div>`;
+                }
+            }
+            
+            document.getElementById('videoForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                uploadFile('videoForm', '/upload-video');
+            });
+            
+            document.getElementById('audioForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                uploadFile('audioForm', '/upload-audio');
+            });
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check() -> HealthResponse:
